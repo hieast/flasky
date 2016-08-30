@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}登陆Blog{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>登陆</h1>
+</div>
+ {{ wtf.quick_form(form) }}
+
+<p>
+    没有账号？欢迎<a href="{{ url_for('auth.register') }}">点击这里</a>注册！
+</p>
+{% endblock %}

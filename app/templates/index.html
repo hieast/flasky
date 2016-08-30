@@ -7,9 +7,13 @@ index-blog
 
 {% block page_content %}
 <div class="page-header">
-    <h1>你好，{% if name %}{{ name }}
-    {% else %}异界的旅客
-    {% endif %}！</h1>
+    <h1>
+        你好，
+        {% if current_user.is_authenticated %}
+        {{ current_user.username }}
+        {% else %}异界的旅客
+        {% endif %}！
+    </h1>
     {% if not known %}
     <p>很高兴认识你~</p>
     {% else %}
