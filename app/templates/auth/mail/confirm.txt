@@ -1,0 +1,9 @@
+亲爱的{{ user.username }}：
+
+欢迎注册博客空间，跟我一起玩耍！
+为了确认您的账号，请点击以下的链接：
+{{ url_for('auth.confirm', token=token, _external=True) }}
+如果无法弹出网页，请将网址复制到浏览器地址栏打开确认。
+谢谢！
+
+您忠诚的Hieast

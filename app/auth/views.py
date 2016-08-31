@@ -1,9 +1,9 @@
 from flask import render_template, redirect, request, url_for, flash
-from flask_login import login_required, login_user, logout_user
-
+from flask_login import login_required, login_user, logout_user, current_user
 from app import db
 from app.auth import auth
 from app.auth.forms import LoginForm, RegistrationForm
+from app.email import send_email
 from app.models import User
 
 
@@ -35,6 +35,21 @@ def register():
                     username=form.username.data,
                     password=form.password.data)
         db.session.add(user)
-        flash('你现在可以登录了！')
-        return redirect(url_for('auth.login'))
+        db.session.commit()
+        token = user.generate_confirm_token()
+        send_email(user.email, '确认您的账号', 'auth/mail/confirm', user=user, token=token)
+        flash('一封确认邮件已发送到您的邮箱，请注意查收！')
+        return redirect(url_for('main.index'))
     return render_template('auth/register.html', form=form)
+
+
+@auth.route('confirm/<token>')
+@login_required
+def confirm(token):
+    if current_user.confirmed:
+        return redirect(url_for('main.index'))
+    elif current_user.confirm(token):
+        flash('您已经成功确认了您的账号,现在可以正常使用了')
+    else:
+        flash('该确认链接已失效，请重新获取！')
+    return redirect(url_for('main.index'))

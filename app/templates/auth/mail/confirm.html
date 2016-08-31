@@ -1,0 +1,17 @@
+<p>亲爱的{{ user.username }}：,</p>
+<p>欢迎注册博客空间，跟我一起玩耍！</b>!</p>
+<p>为了确认您的账号，请点击以下的链接： <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">确认账号</a>.</p>
+<p>如果无法弹出网页，请将以下网址复制到浏览器地址栏打开确认：</p>
+<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>谢谢！</p>
+<p>您忠诚的Hieast</p>
+<p><small>注意：该邮件可直接回复，与我交流</small></p>
+
+<p>Dear {{ user.username }},</p>
+<p>Welcome to <b>Blog Space</b>!</p>
+<p>To confirm your account please <a href="{{ url_for('auth.confirm', token=token, _external=True) }}">click here</a>.</p>
+<p>Alternatively, you can paste the following link in your browser's address bar:</p>
+<p>{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+<p>Sincerely,</p>
+<p>Hieast</p>
+<p><small>Note: replies to this email address are monitored.</small></p>
