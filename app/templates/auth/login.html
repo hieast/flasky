@@ -12,4 +12,7 @@
 <p>
     没有账号？欢迎<a href="{{ url_for('auth.register') }}">点击这里</a>注册！
 </p>
+<p>
+    如果忘记的密码，请<a href="{{ url_for('auth.reset_password_request') }}">点击这里</a>找回！
+</p>
 {% endblock %}

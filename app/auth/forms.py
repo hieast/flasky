@@ -31,4 +31,21 @@ class RegistrationForm(Form):
             raise ValidationError('用户名已注册！')
 
 
+class ChangePasswordForm(Form):
+    old_password = PasswordField('旧密码', validators=[DataRequired()])
+    new_password = PasswordField('新密码', validators=[
+        DataRequired(), EqualTo('new_password2', message="密码不一致")])
+    new_password2 = PasswordField('确认新密码', validators=[DataRequired()])
+    submit = SubmitField('确认修改密码')
 
+
+class PasswordResetRequestForm(Form):
+    email = StringField('请输入您注册用的用户名或邮箱', validators=[DataRequired(), Length(1, 64)])
+    submit = SubmitField('确认账号')
+
+class PasswordResetForm(Form):
+    email = StringField('请输入您注册用的用户名或邮箱', validators=[DataRequired(), Length(1, 64)])
+    new_password = PasswordField('新密码', validators=[
+        DataRequired(), EqualTo('new_password2', message="密码不一致")])
+    new_password2 = PasswordField('确认新密码', validators=[DataRequired()])
+    submit = SubmitField('确认修改密码')
