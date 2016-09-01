@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 from app import create_app, db
-from app.models import User, Role
+from app.models import User, Role, Post
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
@@ -12,7 +12,7 @@ migrate = Migrate(app, db)
 
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role)
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command("db", MigrateCommand)
 
@@ -23,6 +23,22 @@ def test():
     import unittest
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
+
+@manager.command
+def rollback():
+    u = User.query.all()
+    p = Post.query.all()
+    for i in range(1, User.query.count()):
+        db.session.delete(u[i])
+        db.session.commit()
+    for i in range(1, Post.query.count()):
+        db.session.delete(p[i])
+        db.session.commit()
+
+@manager.command
+def fake():
+    User.generate_fake()
+    Post.generate_fake()
 
 
 if __name__ == '__main__':

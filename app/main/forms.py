@@ -1,8 +1,7 @@
+from flask_pagedown.fields import PageDownField
 from flask_wtf import Form
 from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, ValidationError
-from wtforms.widgets import TextArea
-
 from app.models import User, Role
 
 
@@ -48,5 +47,5 @@ class EditProfileAdminForm(Form):
 
 
 class PostForm(Form):
-    body = TextAreaField('微博内容', validators=[DataRequired()])
+    body = PageDownField('微博内容', validators=[DataRequired()])
     submit = SubmitField('提交')

@@ -1,38 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}{{ user.username }}的资料{% endblock %}
+{% block title %}[Hi微博] 博文{% endblock %}
 
 {% block page_content %}
-<div class="page-header">
-    <img class="img-rounded profile-thumbnail"  src="{{ user.gravatar(size=256) }}">
-    <div class="profile-header">
-        <h1>{{ user.username }}</h1>
-        {% if user.name or user.location %}
-        <p>
-            {% if user.name %}{{ user.name }}{% endif %}
-            {% if user.location %}
-            来自<a href="http://map.baidu.com/?q={{ user.location }}">{{ user.location }}</a>
-            {% endif %}
-        </p>
-        {% endif %}
-        {% if current_user.is_administrator() %}
-        <p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
-        {% endif %}
-        {% if user.about_me %}
-            <p>{{ user.about_me }}</p>
-        {% endif %}
-        <p>
-            注册时间：{{ moment(user.member_since).format('L') }}
-            最后登陆：{{ moment(user.last_seen).fromNow() }}
-        </p>
-        <p>
-        {% if user == current_user %}
-            <a class="btn btn-default"  href="{{ url_for('main.edit_profile') }}">编辑资料</a>
-        {% endif %}
-        {% if current_user.is_administrator() %}
-            <a class="btn btn-danger"  href="{{ url_for('main.edit_profile_admin', id=user.id) }}">编辑资料</a>
-        {% endif %}
-        </p>
-    </div>
-</div>
+{% include "_posts.html" %}
 {% endblock %}

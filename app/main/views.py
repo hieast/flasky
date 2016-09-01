@@ -1,11 +1,9 @@
-from flask import render_template, session, redirect, url_for, current_app,abort, flash
-from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for,abort, flash, request
+from flask_login import login_required, current_user, current_app
 from .. import db
 from . import main
 from ..models import User, Permission, Role, Post
-from ..email import send_email
-from .forms import NameForm, EditProfileForm, EditProfileAdminForm, PostForm
-from datetime import datetime
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm
 from app.decorators import admin_required, permission_required
 
 
@@ -16,27 +14,11 @@ def index():
         post = Post(body=form.body.data, author=current_user._get_current_object())
         db.session.add(post)
         return redirect(url_for('.index'))
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html', form=form, posts=posts)
-    # form = NameForm()
-    # if form.validate_on_submit():
-    #     user = User.query.filter_by(username=form.name.data).first()
-    #     if user is None:
-    #         user = User(username=form.name.data)
-    #         db.session.add(user)
-    #         session['known'] = False
-    #         if current_app.config['FLASKY_ADMIN']:
-    #             send_email(current_app.config['FLASKY_ADMIN'], '新用户',
-    #                        'mail/new_user', user=user)
-    #     else:
-    #         session['known'] = True
-    #     session['name'] = form.name.data
-    #     form.name.data = ''
-    #     return redirect(url_for('.index'))
-    # return render_template('index.html',
-    #                        form=form, name=session.get('name'),
-    #                        known = session.get('known', False),
-    #                        current_time=datetime.utcnow())
+    page = request.args.get('page', 1, type=int)
+    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'], error_out=False)
+    posts=pagination.items
+    return render_template('index.html', form=form, posts=posts, pagination=pagination)
 
 
 # 为了测试权限函数
@@ -113,5 +95,23 @@ def edit_profile_admin(id):
     return render_template('edit_admin_profile.html', form=form, user=user)
 
 
-# @main.route('/', methods=['GET', 'POST'])
-# def index()
+@main.route('/post/<int:id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', posts=[post])
+
+
+@main.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id):
+    post = Post.query.get_or_404(id)
+    if current_user != post.author and not current_user.can(Permission.ADMINISTER):
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.body = form.body.data
+        db.session.add(post)
+        flash('博文已经成功更新。')
+        return redirect(url_for('.post', id=post.id))
+    form.body.data = post.body
+    return render_template('edit_post.html', form=form)
