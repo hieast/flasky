@@ -2,33 +2,28 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block title %}
-博客空间
+Hi微博
 {% endblock %}
 
 {% block page_content %}
 <div class="page-header">
     <h1>
-        你好，
+        <p> 你好，
         {% if current_user.is_authenticated %}
         {{ current_user.username }}
-        {% else %}异界的旅客
+        {% else %}
+        陌生的朋友。
+        </p>
+        <p>
+        欢迎来到Hi博客。注册后可以用markdown语法发布微博，记录技术灵感！
         {% endif %}！
+        </p>
     </h1>
-    {% if not known %}
-    <p>很高兴认识你~</p>
-    {% else %}
-    <p>很高兴再次遇到你~</p>
-    {% endif %}
-</div>
-{{ wtf.quick_form(form) }}
-{% endblock %}
-
-{% block body %}
-{{ super() }}
-<div class="footer">
-    <div class="container">
-        <p>页面获取时间为{{ moment(current_time).format('LLL')  }}。</p>
-        <p>这是{{ moment(current_time).fromNow(refresh=True) }}。</p>
+    <div>
+        {% if current_user.can(Permission.WRITE_ARTICLES) %}
+        {{ wtf.quick_form(form) }}
+        {% endif %}
     </div>
 </div>
+{% include '_posts.html' %}
 {% endblock %}

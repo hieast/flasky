@@ -45,3 +45,8 @@ class EditProfileAdminForm(Form):
     def validate_username(self, field):
         if field.data != self.user.username and User.query.filter_by(username=field.data).first():
             raise ValidationError('用户名已注册！')
+
+
+class PostForm(Form):
+    body = TextAreaField('微博内容', validators=[DataRequired()])
+    submit = SubmitField('提交')

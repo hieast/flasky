@@ -2,34 +2,41 @@ from flask import render_template, session, redirect, url_for, current_app,abort
 from flask_login import login_required, current_user
 from .. import db
 from . import main
-from ..models import User, Permission, Role
+from ..models import User, Permission, Role, Post
 from ..email import send_email
-from .forms import NameForm, EditProfileForm, EditProfileAdminForm
+from .forms import NameForm, EditProfileForm, EditProfileAdminForm, PostForm
 from datetime import datetime
 from app.decorators import admin_required, permission_required
 
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    form = NameForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.name.data).first()
-        if user is None:
-            user = User(username=form.name.data)
-            db.session.add(user)
-            session['known'] = False
-            if current_app.config['FLASKY_ADMIN']:
-                send_email(current_app.config['FLASKY_ADMIN'], '新用户',
-                           'mail/new_user', user=user)
-        else:
-            session['known'] = True
-        session['name'] = form.name.data
-        form.name.data = ''
+    form = PostForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
         return redirect(url_for('.index'))
-    return render_template('index.html',
-                           form=form, name=session.get('name'),
-                           known = session.get('known', False),
-                           current_time=datetime.utcnow())
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', form=form, posts=posts)
+    # form = NameForm()
+    # if form.validate_on_submit():
+    #     user = User.query.filter_by(username=form.name.data).first()
+    #     if user is None:
+    #         user = User(username=form.name.data)
+    #         db.session.add(user)
+    #         session['known'] = False
+    #         if current_app.config['FLASKY_ADMIN']:
+    #             send_email(current_app.config['FLASKY_ADMIN'], '新用户',
+    #                        'mail/new_user', user=user)
+    #     else:
+    #         session['known'] = True
+    #     session['name'] = form.name.data
+    #     form.name.data = ''
+    #     return redirect(url_for('.index'))
+    # return render_template('index.html',
+    #                        form=form, name=session.get('name'),
+    #                        known = session.get('known', False),
+    #                        current_time=datetime.utcnow())
 
 
 # 为了测试权限函数
@@ -53,7 +60,8 @@ def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         abort(404)
-    return render_template('user.html', user=user)
+    posts = user.posts.order_by(Post.timestamp.desc()).all()
+    return render_template('user.html', user=user, posts=posts)
 
 
 # 用户编辑个人资料
@@ -103,3 +111,7 @@ def edit_profile_admin(id):
     form.location.data = user.location
     form.about_me.data = user.about_me
     return render_template('edit_admin_profile.html', form=form, user=user)
+
+
+# @main.route('/', methods=['GET', 'POST'])
+# def index()
