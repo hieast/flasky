@@ -8,18 +8,24 @@ Hi微博
 
 {% block page_content %}
 <div class="page-header">
-    <h1>
-        <p> 你好，
-        {% if current_user.is_authenticated %}
-        {{ current_user.username }}
-        {% else %}
-        陌生的朋友。
-        </p>
-        <p>
-        欢迎来到Hi博客。注册后可以用markdown语法发布微博，记录技术灵感！
-        {% endif %}！
-        </p>
-    </h1>
+    {% if not current_user.is_authenticated %}
+        <h1> 你好，
+            {% if current_user.username %}
+                {{ current_user.username }}
+            {% else %}
+                朋友。
+            {% endif %}
+            欢迎来到Hieast博客。
+        </h1>
+        <h3><p>
+            这里是Hieast添加新功能的地方，也是存放技术灵感的技术微博。
+            <br>
+            注册后可以用markdown语法发布微博，还有更多功能待添加。
+        </h3>
+    {% else %}
+        <h1> 欢迎回来，{{ current_user.username }} </h1>
+    {% endif %}
+
     <div>
         {% if current_user.can(Permission.WRITE_ARTICLES) %}
         {{ wtf.quick_form(form) }}

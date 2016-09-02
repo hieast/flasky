@@ -35,6 +35,9 @@
                 {% else %}
                 <li><a href="{{ url_for('auth.login') }}">登陆</a></li>
                 {% endif %}
+                {% if current_user.can(Permission.MODERATE_COMMENTS) %}
+                <li><a href="{{ url_for('main.moderate') }}">管理评论</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
