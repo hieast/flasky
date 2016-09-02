@@ -1,7 +1,21 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
 {% block title %}[Hi微博] 博文{% endblock %}
 
 {% block page_content %}
 {% include "_posts.html" %}
+<h3 id="comments">评论</h3>
+{% if current_user.can(Permission.COMMENT) %}
+<div class="comment-form">
+    {{ wtf.quick_form(form) }}
+</div>
+{% endif %}
+{% if pagination %}
+{% include "_comments.html" %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.post', fragment='#comments', id=posts[0].id )}}
+</div>
+{% endif %}
 {% endblock %}

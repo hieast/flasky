@@ -47,5 +47,11 @@ class EditProfileAdminForm(Form):
 
 
 class PostForm(Form):
-    body = PageDownField('微博内容', validators=[DataRequired()])
+    body = PageDownField('发布微博', validators=[DataRequired()])
     submit = SubmitField('提交')
+
+
+class CommentForm(Form):
+    body = StringField('', validators=[DataRequired()])
+    submit = SubmitField('提交')
+

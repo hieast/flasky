@@ -23,6 +23,7 @@ class Config(object):
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS')
     FLASKY_POSTS_PER_PAGE = int(os.environ.get('FLASKY_POSTS_PER_PAGE'))
+    FLASKY_COMMENTS_PER_PAGE = int(os.environ.get('FLASKY_COMMENTS_PER_PAGE'))
 
     @staticmethod
     def init_app(app):

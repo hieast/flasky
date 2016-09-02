@@ -18,7 +18,7 @@
             </div>
             <div class="post-footer">
                 <a href="{{ url_for('.post', id=post.id) }}">
-                    <span class="label label-default">固定链接</span>
+                    <span class="label label-default">打开</span>
                 </a>
                 {% if current_user == post.author %}
                 <a href="{{ url_for('.edit', id=post.id) }}">
@@ -29,6 +29,9 @@
                     <span class="label label-danger">编辑[管理员]</span>
                 </a>
                 {% endif %}
+                <a href="{{ url_for('.post', id=post.id) }}#comments">
+                    <span class="label label-primary">{{ post.comments.count() }} 条评论</span>
+                </a>
             </div>
         </div>
     </li>
