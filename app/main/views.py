@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for,abort, flash, request
+from flask import render_template, redirect, url_for,abort, flash, request, make_response
 from flask_login import login_required, current_user, current_app
 from .. import db
 from . import main
@@ -15,10 +15,43 @@ def index():
         db.session.add(post)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
-    pagination = Post.query.order_by(Post.timestamp.desc()).paginate(
+    show_follow = 0
+    if current_user.is_authenticated:
+        show_follow = int(request.cookies.get('show_follow', 0))
+    if show_follow == 1:
+        query = current_user.followed_posts
+    elif show_follow == 2:
+        query = current_user.follower_posts
+    else:
+        query = Post.query
+    pagination = query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'], error_out=False)
     posts=pagination.items
-    return render_template('index.html', form=form, posts=posts, pagination=pagination)
+    return render_template('index.html', form=form, posts=posts, pagination=pagination, show_follow=show_follow)
+
+
+@main.route('/all')
+@login_required
+def show_all():
+    resp = make_response(redirect(url_for('.index')))
+    resp.set_cookie('show_follow', '0', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/followed')
+@login_required
+def show_followed():
+    resp = make_response(redirect(url_for('.index')))
+    resp.set_cookie('show_follow', '1', max_age=30*24*60*60)
+    return resp
+
+
+@main.route('/follower')
+@login_required
+def show_follower():
+    resp = make_response(redirect(url_for('.index')))
+    resp.set_cookie('show_follow', '2', max_age=30*24*60*60)
+    return resp
 
 
 # 为了测试权限函数
@@ -115,3 +148,63 @@ def edit(id):
         return redirect(url_for('.post', id=post.id))
     form.body.data = post.body
     return render_template('edit_post.html', form=form)
+
+
+@main.route('/follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('非法用户对象')
+        return redirect(url_for('.index'))
+    if current_user.is_following(user):
+        flash('您已经关注了该用户')
+        return redirect(url_for('.user', username=username))
+    current_user.follow(user)
+    flash('关注 %s 成功' % username)
+    return redirect(url_for('.user', username=username))
+
+
+@main.route('/unfollow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('非法用户对象')
+        return redirect(url_for('.index'))
+    if not current_user.is_following(user):
+        flash('您未关注该用户')
+        return redirect(url_for('.user', username=username))
+    current_user.unfollow(user)
+    flash('取消关注 %s 成功' % username)
+    return redirect(url_for('.user', username=username))
+
+
+@main.route('/followers/<username>')
+def followers(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('非法用户对象')
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followers.paginate(
+        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'], error_out=False)
+    follows = [{'user': item.follower, 'timestamp': item.timestamp} for item in pagination.items]
+    return render_template('followers.html', user=user, title="的关注者", endpoint='.followers',
+                           pagination=pagination, follows=follows)
+
+
+@main.route('/followed_by/<username>')
+def followed_by(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('非法用户对象')
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followed.paginate(
+        page, per_page=current_app.config['FLASKY_POSTS_PER_PAGE'], error_out=False)
+    follows = [{'user': item.followed, 'timestamp': item.timestamp} for item in pagination.items]
+    return render_template('followers.html', user=user, title="关注了", endpoint='.followed_by',
+                           pagination=pagination, follows=follows)

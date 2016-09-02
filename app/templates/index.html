@@ -26,7 +26,16 @@ Hi微博
         {% endif %}
     </div>
 </div>
-{% include '_posts.html' %}
+<div class="post-tabs">
+    <ul class="nav nav-tabs">
+        <li{% if show_follow == 0 %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">全部</a></li>
+        {% if current_user.is_authenticated %}
+            <li{% if show_follow == 1 %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">关注者</a></li>
+            <li{% if show_follow == 2 %} class="active"{% endif %}><a href="{{ url_for('.show_follower') }}">追随者</a></li>
+        {% endif %}
+    </ul>
+    {% include '_posts.html' %}
+</div>
 <div class="pagination">
     {{ macros.pagination_widget(pagination, '.index') }}
 </div>
