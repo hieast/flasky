@@ -227,6 +227,7 @@ class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False
 
+    @property
     def is_administrator(self):
         return False
 login_manager.anonymous_user = AnonymousUser
